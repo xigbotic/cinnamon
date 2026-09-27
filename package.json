@@ -63,7 +63,8 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Cinnamon"
+      "shortcutName": "Cinnamon",
+      "artifactName": "Cinnamon-Setup-${version}.${ext}"
     },
     "publish": [
       {

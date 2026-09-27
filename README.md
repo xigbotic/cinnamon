@@ -55,8 +55,8 @@ Apple Music app you already use.
 
 ## Install
 
-1. Download the latest `Cinnamon Setup` installer from
-   [Releases](https://github.com/xigbotic/cinnamon/releases/latest).
+1. Download `Cinnamon-Setup-<version>.exe` from the latest release on
+   [GitHub](https://github.com/xigbotic/cinnamon/releases/latest).
 2. Run it. The installer isn't code-signed yet, so Windows SmartScreen may warn
    you. Choose **More info → Run anyway**.
 3. Open Apple Music and play something. The first launch walks you through
