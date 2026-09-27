@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: https://*.mzstatic.com https://lastfm-img.freetls.fastly.net https://lastfm.freetls.fastly.net; style-src 'self' 'unsafe-inline'; connect-src 'self';"
+    />
+    <title>Cinnamon</title>
+  </head>
+  <body>
+    <div id="ambient"></div>
+    <div id="ambient-glow"></div>
+    <div id="toast" class="toast"></div>
+
+    <!-- CUSTOM TITLE BAR -->
+    <header class="titlebar">
+      <span class="brand">
+        <span class="brand-logo"></span>
+        <span class="wordmark">CINNAMON</span>
+      </span>
+      <span class="titlebar-right">
+        <span class="scrobbles" id="scrobbleCount"></span>
+        <button class="win-btn" id="winMin" title="Minimize" aria-label="Minimize">
+          <svg viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="1.2" /></svg>
+        </button>
+        <button class="win-btn close" id="winClose" title="Close" aria-label="Close">
+          <svg viewBox="0 0 12 12">
+            <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+        </button>
+      </span>
+    </header>
+
+    <div class="update-banner" id="updateBanner">
+      <span id="updateBannerText">Update ready</span>
+      <button id="updateBannerBtn">RESTART</button>
+    </div>
+
+    <div id="app">
+      <!-- NOW PLAYING -->
+      <section class="view active" id="view-now">
+        <div class="card">
+          <button class="expand-btn" id="expandBtn" title="Fullscreen">
+            <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </button>
+          <div class="sleep-wrap">
+            <button class="sleep-btn" id="sleepBtn" title="Sleep timer">
+              <svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              <span id="sleepLabel"></span>
+            </button>
+            <div class="sleep-menu" id="sleepMenu"></div>
+          </div>
+          <div class="cover" id="cover"></div>
+          <div class="meta">
+            <div class="track" id="track">Ready</div>
+            <div class="artist" id="artist">Waiting for Apple Music…</div>
+            <div class="album" id="album"></div>
+            <div class="track-extra hidden" id="trackExtra">
+              <button class="love-btn" id="loveBtn" title="Love on Last.fm">
+                <svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>
+              </button>
+              <span class="plays" id="plays"></span>
+            </div>
+          </div>
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress" id="progress"></div>
+          </div>
+          <div class="controls" id="controls"></div>
+          <div class="status" id="status">IDLE</div>
+        </div>
+      </section>
+
+      <!-- SEARCH -->
+      <section class="view" id="view-search">
+        <input id="searchInput" class="search-input" type="text" placeholder="Search Apple Music…" autocomplete="off" />
+        <div class="results" id="results"></div>
+      </section>
+
+      <!-- LYRICS -->
+      <section class="view" id="view-lyrics">
+        <div class="lyrics" id="lyrics">
+          <div class="lyrics-empty">No lyrics</div>
+        </div>
+        <div class="offset-bar" id="offsetBar">
+          <button id="offsetDown" class="offset-btn" title="Lyrics earlier">−</button>
+          <span id="offsetLabel" class="offset-label">sync 0.0s</span>
+          <button id="offsetUp" class="offset-btn" title="Lyrics later">+</button>
+          <button id="karaokeQuick" class="offset-btn karaoke-quick" title="Word-by-word highlight (estimated timing)">
+            <svg viewBox="0 0 24 24"><path d="M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 13l3.5-8 3.5 8M6.3 10h4.4M15 5v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20.5h7" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".55"/></svg>
+          </button>
+          <button id="shareStart" class="offset-btn share-start" title="Share lyrics as an image">
+            <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="share-bar" id="shareBar">
+          <span id="shareCount">Tap lines to share</span>
+          <button class="btn secondary small" id="shareCancel">CANCEL</button>
+          <button class="btn small" id="shareCreate">CREATE CARD</button>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section class="view" id="view-stats">
+        <div class="stats">
+          <div class="stats-empty" id="statsEmpty"></div>
+          <div class="stats-body" id="statsBody">
+            <div class="stat-tiles">
+              <div class="stat-tile"><div class="stat-value" id="statTotal">–</div><div class="stat-label">Scrobbles</div></div>
+              <div class="stat-tile"><div class="stat-value" id="statToday">–</div><div class="stat-label">Today</div></div>
+              <div class="stat-tile"><div class="stat-value" id="statStreak">–</div><div class="stat-label">Day streak</div></div>
+              <div class="stat-tile"><div class="stat-value" id="statSince">–</div><div class="stat-label">Since</div></div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-head">
+                <span>Last 30 days</span>
+                <span class="stats-head-note" id="days30Note"></span>
+              </div>
+              <div class="daychart" id="dayChart" role="img"></div>
+              <div class="daychart-axis"><span id="dayStart"></span><span>Today</span></div>
+              <div class="chart-tip" id="dayTip"></div>
+            </div>
+
+            <div class="seg" id="statsPeriod"></div>
+
+            <div class="stats-card">
+              <div class="stats-head"><span>Top artists</span></div>
+              <div class="rank" id="topArtists"></div>
+            </div>
+            <div class="stats-card">
+              <div class="stats-head"><span>Top albums</span></div>
+              <div class="album-grid" id="topAlbums"></div>
+            </div>
+            <div class="stats-card">
+              <div class="stats-head"><span>Top tracks</span></div>
+              <div class="rank" id="topTracks"></div>
+            </div>
+            <div class="stats-card" id="onThisDayCard">
+              <div class="stats-head">
+                <span id="onThisDayTitle">On this day</span>
+                <span class="stats-head-note" id="onThisDayNote"></span>
+              </div>
+              <div class="rank" id="onThisDay"></div>
+            </div>
+
+            <button class="btn secondary small stats-refresh" id="statsRefresh">REFRESH</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="view-settings">
+        <div class="settings">
+          <div class="setting-group">
+            <div class="setting-label">Last.fm</div>
+            <div id="lastfmStatus" class="lastfm-status">Not connected</div>
+            <button id="lastfmBtn" class="btn">CONNECT LAST.FM</button>
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">Lyrics</div>
+            <label class="checkbox">
+              <input type="checkbox" id="karaokeToggle" />
+              <span>Word-by-word highlight</span>
+            </label>
+            <div class="hint">
+              Most lyrics are timed by line, not by word. For those, word
+              timing is estimated from the line's length and can run a second
+              or two early or late. Also toggles from the lyrics tab, or K in
+              fullscreen.
+            </div>
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">Theme</div>
+            <div class="themes" id="themePicker"></div>
+            <div class="theme-editor" id="themeEditor">
+              <div class="sub-label" id="teTitle">New theme</div>
+              <input id="teName" class="text-input" type="text" maxlength="30" placeholder="Theme name" spellcheck="false" />
+              <div class="te-grid" id="teColors"></div>
+              <div class="hint" id="teContrast"></div>
+              <div class="te-actions">
+                <button class="btn secondary small" id="teDelete">DELETE</button>
+                <span class="te-spacer"></span>
+                <button class="btn secondary small" id="teCancel">CANCEL</button>
+                <button class="btn small" id="teSave">SAVE THEME</button>
+              </div>
+            </div>
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">Behavior</div>
+            <label class="checkbox">
+              <input type="checkbox" id="startupToggle" />
+              <span>Start with Windows</span>
+            </label>
+            <label class="checkbox" style="margin-top: 10px">
+              <input type="checkbox" id="closeTrayToggle" />
+              <span>Close to system tray</span>
+            </label>
+            <label class="checkbox" style="margin-top: 10px">
+              <input type="checkbox" id="notifyToggle" />
+              <span>Notify when the track changes</span>
+            </label>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">Fullscreen Visualizer</div>
+            <div id="vizPicker"></div>
+
+            <div class="sub-label">Auto-switch</div>
+            <div class="seg" id="vizCycle"></div>
+            <div class="hint" id="vizCycleHint"></div>
+
+            <div class="sub-label">Quality</div>
+            <div class="seg" id="vizQuality"></div>
+            <div class="hint" id="vizQualityHint"></div>
+
+            <label class="checkbox" style="margin-top: 14px">
+              <input type="checkbox" id="vizPaletteToggle" />
+              <span>Colour from artwork</span>
+            </label>
+            <label class="checkbox" style="margin-top: 10px">
+              <input type="checkbox" id="vizAudioToggle" />
+              <span>React to system audio</span>
+            </label>
+
+            <div class="sub-label">Audio source</div>
+            <select id="vizDevice" class="text-input select-input"></select>
+
+            <div class="sub-label">Input boost</div>
+            <div class="seg" id="vizBoost"></div>
+            <div class="hint" id="vizBoostHint"></div>
+
+            <div class="level-row">
+              <span class="level-label">INPUT</span>
+              <div class="level-track"><div class="level-fill" id="vizLevel"></div></div>
+              <span class="level-label" id="vizGain"></span>
+            </div>
+
+            <div class="hint">
+              Using a virtual mixer (VoiceMeeter / VB-Cable)? Default-playback
+              loopback won't hear audio routed to a separate bus, so pick that
+              mixer's output (e.g. "Voicemeeter Out B1") here instead. The meter
+              should move when music plays.
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">Fullscreen Layout</div>
+            <div class="seg" id="immLayoutPicker"></div>
+            <div class="sub-label">Title position (visualizer only)</div>
+            <div class="corner-picker" id="captionPosPicker"></div>
+            <div class="hint">
+              In fullscreen: L toggles lyrics, K toggles word-by-word, V toggles visualizer-only, ← → switch visualizer.
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">Floating Lyrics</div>
+            <label class="checkbox">
+              <input type="checkbox" id="floatToggle" />
+              <span>Show lyrics on top of other windows</span>
+            </label>
+            <label class="checkbox" style="margin-top: 10px">
+              <input type="checkbox" id="floatLockToggle" />
+              <span>Lock in place (clicks pass through)</span>
+            </label>
+            <div class="sub-label">Text size</div>
+            <div class="seg" id="floatSize"></div>
+            <div class="hint">
+              Unlock to drag or resize the strip. Works over fullscreen games and
+              video.
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">Keyboard Shortcuts</div>
+            <label class="checkbox">
+              <input type="checkbox" id="hotkeysToggle" />
+              <span>Global shortcuts (work from any app)</span>
+            </label>
+            <div class="hotkey-list" id="hotkeyList"></div>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">Discord Rich Presence</div>
+            <label class="checkbox">
+              <input type="checkbox" id="discordToggle" />
+              <span>Show current track on Discord</span>
+            </label>
+            <div class="hint">Keep the Discord desktop app running.</div>
+            <label class="checkbox" style="margin-top: 12px">
+              <input type="checkbox" id="discordCustomToggle" />
+              <span>Use my own Discord application</span>
+            </label>
+            <div id="discordCustomBox" style="display: none">
+              <input
+                id="discordClientId"
+                class="text-input"
+                type="text"
+                inputmode="numeric"
+                placeholder="Your application ID"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <div class="hint">
+                Create an app at discord.com/developers and paste its Application
+                ID. Your status then shows that app's name and icon instead of
+                Cinnamon's.
+              </div>
+            </div>
+
+            <div class="sub-label">“Listening to …” text</div>
+            <input id="discordName" class="text-input" type="text" placeholder="{artist}" spellcheck="false" />
+            <div class="sub-label">Top line</div>
+            <input id="discordDetail" class="text-input" type="text" placeholder="{track}" spellcheck="false" />
+            <div class="sub-label">Bottom line</div>
+            <input id="discordState" class="text-input" type="text" placeholder="by {artist}" spellcheck="false" />
+            <div class="hint">Tokens: {track} · {artist} · {album} · {player}</div>
+
+            <label class="checkbox" style="margin-top: 12px">
+              <input type="checkbox" id="discordArt" />
+              <span>Show album art</span>
+            </label>
+            <label class="checkbox" style="margin-top: 8px">
+              <input type="checkbox" id="discordProgress" />
+              <span>Show progress bar</span>
+            </label>
+            <label class="checkbox" style="margin-top: 8px">
+              <input type="checkbox" id="discordPaused" />
+              <span>Keep showing when paused</span>
+            </label>
+            <label class="checkbox" style="margin-top: 8px">
+              <input type="checkbox" id="discordButton" />
+              <span>“Play on Apple Music” button</span>
+            </label>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">Developer</div>
+            <div class="dev-row">
+              <span class="dev-version" id="versionLabel">v0.0.0</span>
+              <div class="dev-buttons">
+                <button id="openDataBtn" class="btn secondary small">DATA FOLDER</button>
+                <button id="toggleLogsBtn" class="btn secondary small">LOGS</button>
+              </div>
+            </div>
+            <div class="update-row">
+              <span id="updateStatus">Updates: checking…</span>
+              <button id="checkUpdatesBtn" class="btn secondary small">CHECK</button>
+            </div>
+            <div class="dev-actions">
+              <button id="diagnosticsBtn" class="btn secondary small">COPY DIAGNOSTICS</button>
+              <button id="rerunSetupBtn" class="btn secondary small">RUN SETUP AGAIN</button>
+            </div>
+            <div class="hint">
+              Reporting a bug? Copy diagnostics and paste it into your report. It
+              leaves out your Last.fm session and Discord ID.
+            </div>
+            <div class="log-panel" id="logPanel" style="display: none"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NAV -->
+      <nav class="nav">
+        <button class="tab active" data-view="now" title="Now Playing">
+          <svg viewBox="0 0 24 24"><path d="M9 18V5l10-2v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="currentColor"/><circle cx="19" cy="16" r="3" fill="currentColor"/></svg>
+        </button>
+        <button class="tab" data-view="search" title="Search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tab" data-view="lyrics" title="Lyrics">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tab" data-view="stats" title="Stats">
+          <svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tab" data-view="settings" title="Settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </nav>
+    </div>
+
+    <!-- SHARE CARD -->
+    <div class="share-modal" id="shareModal">
+      <div class="share-card">
+        <img class="share-preview" id="sharePreview" alt="Lyric card preview" />
+        <div class="seg" id="shareFormat"></div>
+        <div class="share-actions">
+          <button class="btn secondary small" id="shareClose">CLOSE</button>
+          <button class="btn secondary small" id="shareSave">SAVE PNG</button>
+          <button class="btn small" id="shareCopy">COPY IMAGE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIRST-RUN SETUP -->
+    <div class="onboard" id="onboard">
+      <div class="onboard-card">
+        <div class="onboard-dots" id="onboardDots"></div>
+
+        <section class="onboard-step" data-step="0">
+          <div class="onboard-logo"></div>
+          <h2>Welcome to Cinnamon</h2>
+          <p>
+            A companion for Apple Music: live lyrics, scrobbling, visualizers
+            and Discord status. This takes about a minute, and you can change
+            everything later in Settings.
+          </p>
+        </section>
+
+        <section class="onboard-step" data-step="1">
+          <h2>Scrobble to Last.fm</h2>
+          <p>
+            Connect your account to log what you play, see how many times
+            you've played each track, and love tracks from Cinnamon.
+          </p>
+          <div class="lastfm-status" id="onboardLastfmStatus">Not connected</div>
+          <button class="btn" id="onboardLastfmBtn">CONNECT LAST.FM</button>
+        </section>
+
+        <section class="onboard-step" data-step="2">
+          <h2>Pick a look</h2>
+          <p>Dynamic follows the colours of whatever's playing.</p>
+          <div class="themes" id="onboardThemes"></div>
+        </section>
+
+        <section class="onboard-step" data-step="3">
+          <h2>Visualizers that hear the music</h2>
+          <p>
+            Let the fullscreen visualizers react to your audio. Play a song and
+            watch the meter. If it stays flat, pick another source (for example,
+            your VoiceMeeter output).
+          </p>
+          <label class="checkbox">
+            <input type="checkbox" id="onboardAudioToggle" />
+            <span>React to system audio</span>
+          </label>
+          <select id="onboardDevice" class="text-input select-input"></select>
+          <div class="level-row">
+            <span class="level-label">INPUT</span>
+            <div class="level-track"><div class="level-fill" id="onboardLevel"></div></div>
+          </div>
+        </section>
+
+        <section class="onboard-step" data-step="4">
+          <h2>You're set</h2>
+          <ul class="onboard-tips">
+            <li><b>Fullscreen:</b> the expand button on the player. <b>←/→</b> change visualizer, <b>L</b> toggles lyrics.</li>
+            <li><b>Ctrl+Alt+Space</b> plays/pauses from any app. <b>Ctrl+Alt+O</b> shows floating lyrics.</li>
+            <li>The tray icon has the mini player, floating lyrics and a sleep timer.</li>
+          </ul>
+        </section>
+
+        <div class="onboard-nav">
+          <button class="btn secondary small" id="onboardSkip">SKIP SETUP</button>
+          <div class="onboard-nav-right">
+            <button class="btn secondary small" id="onboardBack">BACK</button>
+            <button class="btn small" id="onboardNext">NEXT</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMMERSIVE FULLSCREEN -->
+    <div id="immersive" class="immersive no-lyrics layout-full">
+      <div class="imm-ambient" id="immAmbient"></div>
+      <div class="imm-scrim"></div>
+      <canvas class="imm-viz" id="vizCanvas"></canvas>
+      <canvas class="imm-viz" id="vizGl"></canvas>
+
+      <div class="imm-toolbar" id="immToolbar">
+        <button class="imm-tool" id="immVizPrev" title="Previous visualizer (←)">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="imm-viz-name" id="immVizName">Aurora</span>
+        <button class="imm-tool" id="immVizNext" title="Next visualizer (→)">
+          <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="imm-sep"></span>
+        <button class="imm-tool" id="immLyricsBtn" title="Toggle lyrics (L)">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="imm-tool" id="immKaraokeBtn" title="Word-by-word highlight (K)">
+          <svg viewBox="0 0 24 24"><path d="M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 13l3.5-8 3.5 8M6.3 10h4.4M15 5v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20.5h7" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".55"/></svg>
+        </button>
+        <button class="imm-tool" id="immMinimalBtn" title="Visualizer only (V)">
+          <svg viewBox="0 0 24 24"><path d="M4 18V14M8 18V9M12 18V5M16 18v-7M20 18v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <span class="imm-sep"></span>
+        <button class="imm-tool" id="immExit" title="Exit fullscreen (Esc)">
+          <svg viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="imm-caption pos-bl" id="immCaption">
+        <div class="cap-track" id="capTrack"></div>
+        <div class="cap-artist" id="capArtist"></div>
+      </div>
+
+      <div class="imm-osd" id="immOsd"></div>
+      <div class="imm-left">
+        <div class="imm-cover" id="immCover"></div>
+        <div class="imm-track" id="immTrack"></div>
+        <div class="imm-artist" id="immArtist"></div>
+        <div class="track-extra imm-extra hidden" id="immTrackExtra">
+          <button class="love-btn" id="immLoveBtn" title="Love on Last.fm">
+            <svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>
+          </button>
+          <span class="plays" id="immPlays"></span>
+        </div>
+        <div class="imm-progress-wrap" id="immProgressWrap"><div class="imm-progress" id="immProgress"></div></div>
+        <div class="controls imm-controls" id="immControls"></div>
+      </div>
+      <div class="imm-right">
+        <div class="imm-lyrics" id="immLyrics"><div class="lyrics-empty">No lyrics</div></div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

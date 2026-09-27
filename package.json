@@ -1,0 +1,85 @@
+{
+  "name": "cinnamon",
+  "version": "0.1.0",
+  "description": "A themed Apple Music companion (now-playing, controls, lyrics, scrobbling).",
+  "main": "./out/main/index.js",
+  "author": "Xignotic",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "sidecar:build": "python -m PyInstaller --onefile --name smtc_helper --distpath resources/sidecar --workpath build/pyinstaller --specpath build/pyinstaller --collect-all winsdk --noconsole sidecar/smtc_helper.py",
+    "dist:dir": "npm run build && electron-builder --dir",
+    "set-icon": "node scripts/set-icon.mjs",
+    "dist": "npm run build && electron-builder --dir && npm run set-icon && electron-builder --prepackaged release/win-unpacked",
+    "release": "npm run build && electron-builder --dir && npm run set-icon && electron-builder --prepackaged release/win-unpacked --publish always",
+    "sidecar:setup": "python -m pip install -r sidecar/requirements.txt"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "rcedit": "^5.0.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  },
+  "build": {
+    "appId": "com.xignotic.cinnamon",
+    "productName": "Cinnamon",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/**/*",
+      "package.json",
+      "!**/*.map"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/sidecar",
+        "to": "sidecar"
+      },
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Cinnamon"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "xigbotic",
+        "repo": "cinnamon"
+      }
+    ]
+  },
+  "dependencies": {
+    "@xhayper/discord-rpc": "^1.3.4",
+    "electron-updater": "^6.8.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xigbotic/cinnamon.git"
+  },
+  "homepage": "https://github.com/xigbotic/cinnamon"
+}

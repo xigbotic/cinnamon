@@ -1,0 +1,4 @@
+# Media helper (reads Windows' now-playing session).
+winsdk>=1.0.0b10
+# Only needed to build the standalone helper exe (npm run sidecar:build).
+pyinstaller>=6.0

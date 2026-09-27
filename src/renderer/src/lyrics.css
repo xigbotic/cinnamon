@@ -1,0 +1,122 @@
+:root {
+  --font: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --size: 32px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+html,
+body {
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--font);
+}
+
+body.size-s { --size: 22px; }
+body.size-m { --size: 32px; }
+body.size-l { --size: 46px; }
+
+.float-frame {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--size) * 0.25);
+  padding: 8px 24px;
+  border-radius: 14px;
+  transition: opacity 0.4s ease;
+}
+
+.float-line {
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Readable over anything: a dark outline plus a soft drop shadow. */
+  -webkit-text-stroke: calc(var(--size) * 0.02) rgba(0, 0, 0, 0.55);
+  paint-order: stroke fill;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75), 0 0 2px rgba(0, 0, 0, 0.9);
+}
+
+.float-line.current {
+  /* Long lines wrap to two rather than being cut off. */
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: var(--size);
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Word-by-word fill, as in the main lyrics view. */
+.float-line.karaoke .kw {
+  --p: 0;
+  background: linear-gradient(
+    90deg,
+    #fff calc(var(--p) * 116% - 16%),
+    rgba(255, 255, 255, 0.5) calc(var(--p) * 116%)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.float-line.next {
+  font-size: calc(var(--size) * 0.6);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* New line slides up into place. */
+.float-line.enter {
+  animation: rise 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(35%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+body.paused .float-frame,
+body.idle .float-frame {
+  opacity: 0.35;
+}
+
+/* Unlocked: a visible, draggable frame. */
+body.unlocked .float-frame {
+  background: rgba(10, 8, 8, 0.45);
+  outline: 1px dashed rgba(255, 255, 255, 0.35);
+  outline-offset: -1px;
+  -webkit-app-region: drag;
+  cursor: move;
+}
+
+.float-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  text-align: center;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  display: none;
+}
+body.unlocked .float-hint {
+  display: block;
+}

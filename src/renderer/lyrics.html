@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self';"
+    />
+    <title>Cinnamon Lyrics</title>
+  </head>
+  <body class="float size-m locked">
+    <div class="float-frame">
+      <div class="float-line current" id="current"></div>
+      <div class="float-line next" id="next"></div>
+    </div>
+    <div class="float-hint">Drag to move · drag edges to resize · lock from the tray or settings</div>
+    <script type="module" src="./src/lyrics.ts"></script>
+  </body>
+</html>
